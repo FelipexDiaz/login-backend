@@ -85,4 +85,34 @@ Flight::route('GET /user', function() use ($config) {
     }
 });
 
+Flight::route('GET /modulos', function() use ($config) {
+    header('Content-Type: application/json');
+    try {
+        list($decoded, ) = decodeAccessToken($config);
+        $usuario_id = $decoded['sub']; // asumiendo claim 'sub' contiene el id
+
+        $pdo = getPDO($config);
+
+        $sql = "
+            SELECT m.id, m.nombre, m.ruta, m.componente
+            FROM modulosxusuario mu
+            JOIN modulos m ON mu.modulo_id = m.id
+            WHERE mu.usuario_id = ? AND m.activo = 1
+            ORDER BY m.id
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$usuario_id]);
+        $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode(['ok' => true, 'modulos' => $modulos]);
+    } catch (\Firebase\JWT\ExpiredException $e) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Token expirado', 'message' => $e->getMessage()]);
+    } catch (Exception $e) {
+        http_response_code(401);
+        echo json_encode(['error' => 'No autorizado', 'message' => $e->getMessage()]);
+    }
+});
+
+
 Flight::start();
