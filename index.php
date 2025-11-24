@@ -89,12 +89,12 @@ Flight::route('GET /modulos', function() use ($config) {
     header('Content-Type: application/json');
     try {
         list($decoded, ) = decodeAccessToken($config);
-        $usuario_id = $decoded['sub']; // asumiendo claim 'sub' contiene el id
+        $usuario_id = $decoded['sub'];
 
         $pdo = getPDO($config);
 
         $sql = "
-            SELECT m.id, m.nombre, m.ruta, m.componente
+            SELECT m.id, m.nombre, m.ruta, m.entry, m.container
             FROM modulosxusuario mu
             JOIN modulos m ON mu.modulo_id = m.id
             WHERE mu.usuario_id = ? AND m.activo = 1
