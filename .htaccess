@@ -1,0 +1,33 @@
+# =========================================
+# 🔹 Habilitar Rewrite Engine
+# =========================================
+RewriteEngine On
+
+# =========================================
+# 🔹 Manejo de preflight OPTIONS con CORS
+# =========================================
+<IfModule mod_headers.c>
+    # Solo para OPTIONS (preflight)
+    <If "%{REQUEST_METHOD} == 'OPTIONS'">
+        Header always set Access-Control-Allow-Origin "http://localhost:5173"
+        Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+        Header always set Access-Control-Allow-Credentials "true"
+        # Respuesta 204 para preflight
+        RewriteRule ^(.*)$ $1 [R=204,L]
+    </If>
+</IfModule>
+
+# =========================================
+# 🔹 Evitar acceso directo a archivos sensibles
+# =========================================
+<FilesMatch "\.(env|ini|log|conf)$">
+    Require all denied
+</FilesMatch>
+
+# =========================================
+# 🔹 Rutas limpias → todo pasa por index.php
+# =========================================
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
